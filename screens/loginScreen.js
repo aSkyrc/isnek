@@ -54,10 +54,10 @@ const LoginScreen = () => {
   
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('HomePage');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;  // Firebase user object
+      navigation.navigate('HomePage', { userId: user.uid });  // Pass userId here
     } catch (error) {
-      // Handle specific error codes
       if (error.code === 'auth/invalid-email') {
         Alert.alert("Invalid Email", "Please enter a valid email address.");
       } else {
@@ -67,6 +67,7 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
+  
   
 
   const handleRegister = () => {

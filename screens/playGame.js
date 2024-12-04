@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
+import { rtdb, ref, get } from '../firebaseConfig'; // Import Firebase functions
 
-const PlayGame = ({ navigation }) => {
-  // Game state
+const PlayGame = ({ navigation, route }) => {
+  const { userId } = route.params; // Get userId from route params or props
+  const [username, setUsername] = useState(''); // State to store username
   const [score, setScore] = useState(0);
   const [highestScore, setHighestScore] = useState(0);
 
@@ -13,6 +15,23 @@ const PlayGame = ({ navigation }) => {
   const [loaded] = useFonts({
     'PressStart2P-Regular': require('../assets/fonts/PressStart2P-Regular.ttf'),
   });
+
+  // Fetch user data from Firebase
+  useEffect(() => {
+    if (userId) {
+      const userRef = ref(rtdb, `users/${userId}`);
+      get(userRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUsername(userData.username || 'Guest'); // Set username or 'Guest' if no username
+        } else {
+          console.log("No user data available");
+        }
+      }).catch((error) => {
+        console.error("Error fetching data: ", error);
+      });
+    }
+  }, [userId]);
 
   if (!loaded) {
     return null; // Optionally return a loading indicator
@@ -47,6 +66,12 @@ const PlayGame = ({ navigation }) => {
             />
           </View>
         </LinearGradient>
+
+        {/* Username Section */}
+        <View style={styles.usernameContainer}>
+          {/* Display Username */}
+          <Text style={styles.usernameText}>{`Hello, ${username}`}</Text>
+        </View>
 
         {/* Score Section */}
         <View style={styles.scoreContainer}>
@@ -107,8 +132,19 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontFamily: 'PressStart2P-Regular',
   },
-  scoreContainer: {
+  usernameContainer: {
     position: 'absolute', // Position it at the top
+    top: 150, // Adjust this position to where you want the username
+    width: '100%',
+    alignItems: 'center', // Center the username horizontally
+  },
+  usernameText: {
+    fontSize: 30,
+    color: '#fff',
+    fontFamily: 'PressStart2P-Regular',
+  },
+  scoreContainer: {
+    position: 'absolute', // Position it below the username
     top: 250, // Adjust to your preference
     width: '100%',
     alignItems: 'center', // Center the score horizontally

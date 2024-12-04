@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
+import { ref, onValue, set } from "firebase/database"; // Import set and ref from Firebase Realtime Database
+import { rtdb } from "../firebaseConfig"; // Correct import for Realtime Database
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -42,19 +44,34 @@ const Register = () => {
     return true;
   };
 
-  // Handle Signup
+  // Handle Signup and save user data to Realtime Database
   const handleSignup = async () => {
     if (!isFormValid()) {
       return; // If the form is not valid, do not proceed
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Get the authenticated user's UID
+      const userId = userCredential.user.uid;
+
+      // Set the username in the Realtime Database under the user's UID
+      await set(ref(rtdb, 'users/' + userId), {
+        username: username,
+        email: email,
+      });
+
       Alert.alert("Success", "Account created successfully");
+      
+      // Clear the input fields
       setUsername('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+
+      // Navigate to login page
       navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Error", `Error creating user: ${error.message}`);

@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
+import { rtdb, ref, get } from '../firebaseConfig'; // Import Firebase functions
 
-const LeaderBoards = ({ navigation }) => {
+const LeaderBoards = ({ navigation, route }) => {
+  const { userId } = route.params; // Getting the userId from the route params
+  const [username, setUsername] = useState('Guest'); // Default username
+  const [score, setScore] = useState(0); // State to store the user's score
+  const [loaded] = useFonts({
+    'century-gothic': require('../assets/fonts/PressStart2P-Regular.ttf'),
+  });
+
   // Sample leaderboard data
   const leaderboard = [
     { rank: 1, username: 'Player1', score: 1000 },
@@ -19,27 +27,37 @@ const LeaderBoards = ({ navigation }) => {
     { rank: 10, username: 'Player10', score: 500 },
   ];
 
-  // Sample current user data
-  const currentUser = { rank: 19, username: 'Sky', score: 400 };
-
-  // Load the Century Gothic font
-  const [loaded] = useFonts({
-    'century-gothic': require('../assets/fonts/PressStart2P-Regular.ttf'),
-  });
+  // Fetch user data from Firebase
+  useEffect(() => {
+    if (userId) {
+      const userRef = ref(rtdb, `users/${userId}`);
+      get(userRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            setUsername(userData.username || 'Guest'); // Set the fetched username
+            setScore(userData.score || 0); // Set the fetched score, default to 0
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching data: ', error);
+        });
+    }
+  }, [userId]);
 
   if (!loaded) {
-    return <Text>Loading...</Text>; // Return a loading message while the font is loading
+    return null; // Return null to avoid rendering unnecessary loading state
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContent}>
-        <LinearGradient 
-          colors={['rgba(249, 139, 0, 0.7)', 'rgba(249, 139, 0, 0.35)', '#000000']} 
+        <LinearGradient
+          colors={['rgba(249, 139, 0, 0.7)', 'rgba(249, 139, 0, 0.35)', '#000000']}
           style={styles.navbar}
         >
-          <TouchableOpacity 
-            style={styles.backButton} 
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={() => navigation.goBack()} // Navigate back to the previous screen
           >
             <Icon name="chevron-left" size={24} color="#ffffff" />
@@ -47,20 +65,20 @@ const LeaderBoards = ({ navigation }) => {
 
           <View style={styles.rightContainer}>
             <Text style={styles.homeTitle}>Leaderboards</Text>
-            <Image 
-              source={require('../images/isnek.png')} 
-              style={styles.logo}
-            />
+            <Image source={require('../images/isnek.png')} style={styles.logo} />
           </View>
         </LinearGradient>
 
+        {/* Display the fetched username */}
+        <Text style={styles.usernameText}>{`Welcome, ${username}`}</Text>
+
         <View style={styles.leaderboardContainer}>
           <Text style={styles.topText}>Top Players</Text>
-          
+
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             {leaderboard.map((player) => (
               <View key={String(player.rank)} style={styles.leaderboardRow}>
-                <Text style={styles.rankText}>{String(player.rank)}</Text> 
+                <Text style={styles.rankText}>{String(player.rank)}</Text>
                 <Text style={styles.usernameText}>{String(player.username)}</Text>
                 <Text style={styles.scoreText}>{String(player.score)}</Text>
               </View>
@@ -69,15 +87,9 @@ const LeaderBoards = ({ navigation }) => {
 
           {/* Current user */}
           <View style={[styles.leaderboardRow, styles.currentUserContainer]}>
-            <Text style={[styles.rankText, { color: '#FFD700' }]}>
-              {String(currentUser.rank)}
-            </Text>
-            <Text style={[styles.usernameText, { color: '#FFD700' }]}>
-              {String(currentUser.username)}
-            </Text>
-            <Text style={[styles.scoreText, { color: '#FFD700' }]}>
-              {String(currentUser.score)}
-            </Text>
+            <Text style={[styles.rankText, { color: '#FFD700' }]}>{String(leaderboard.length + 1)}</Text>
+            <Text style={[styles.usernameText, { color: '#FFD700' }]}>{username}</Text>
+            <Text style={[styles.scoreText, { color: '#FFD700' }]}>{String(score)}</Text>
           </View>
         </View>
       </View>

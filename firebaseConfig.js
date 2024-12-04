@@ -6,6 +6,8 @@ import {
   getReactNativePersistence,
 } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import { getFireStore } from "firebase/firestore";
+import { getDatabase } from "firebase/database"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -14,6 +16,7 @@ import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 const firebaseConfig = {
   apiKey: "AIzaSyDKULp2mpIMxyeGbjzKXOM76It97pLW4OM",
   authDomain: "isnek-dd1c3.firebaseapp.com",
+  databaseURL: "https://isnek-dd1c3-default-rtdb.firebaseio.com/",
   projectId: "isnek-dd1c3",
   storageBucket: "isnek-dd1c3.firebasestorage.app",
   messagingSenderId: "672049202531",
@@ -23,8 +26,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const rtdb = getFireStore(app);
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 
-export { app, auth };
+export { app, auth, db, rtdb };

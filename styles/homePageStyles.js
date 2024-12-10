@@ -131,7 +131,7 @@ const homePageStyles = StyleSheet.create({
       top: 10,
       paddingHorizontal: 13,
       fontWeight: 'bold',
-      textAlign: 'justify',
+      textAlign: 'center',
       color: '#ffffff',
       maxHeight: 200,
       overflow: 'hidden',

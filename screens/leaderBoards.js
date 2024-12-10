@@ -9,7 +9,7 @@ import { getAuth } from 'firebase/auth';
 
 const LeaderBoards = ({ navigation }) => {
   const [username, setUsername] = useState('Guest'); // Default username
-  const [score, setScore] = useState(0); // State to store the user's score
+  const [highestScore, setHighestScore] = useState(0); // State to store the user's highest score
   const [leaderboardData, setLeaderboardData] = useState([]); // State to store leaderboard data
   const [userRank, setUserRank] = useState(null); // State to store the user's rank
   const [loaded] = useFonts({
@@ -25,13 +25,13 @@ const LeaderBoards = ({ navigation }) => {
       const userId = currentUser.uid;
       const userRef = ref(rtdb, `users/${userId}`);
 
-      // Fetch current user's data (username, score)
+      // Fetch current user's data (username, highestScore)
       get(userRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
             const userData = snapshot.val();
             setUsername(userData.username || 'Guest'); // Set the fetched username
-            setScore(userData.score || 0); // Set the fetched score, default to 0
+            setHighestScore(userData.highestScore || 0); // Set the fetched highest score, default to 0
           }
         })
         .catch((error) => {
@@ -48,11 +48,11 @@ const LeaderBoards = ({ navigation }) => {
           const leaderboard = Object.keys(data).map((key) => ({
             uid: key,
             username: data[key].username || 'Guest', // Default to 'Guest' if username is null
-            score: data[key].score || 0, // Default to 0 if score is null
+            highestScore: data[key].highestScore || 0, // Default to 0 if highestScore is null
           }));
 
-          // Sort leaderboard by score
-          leaderboard.sort((a, b) => b.score - a.score);
+          // Sort leaderboard by highestScore
+          leaderboard.sort((a, b) => b.highestScore - a.highestScore);
 
           // Find the user's rank in the leaderboard
           const userIndex = leaderboard.findIndex(player => player.username === username);
@@ -90,8 +90,6 @@ const LeaderBoards = ({ navigation }) => {
           </View>
         </LinearGradient>
 
-
-
         <View style={styles.leaderboardContainer}>
           <Text style={styles.topText}>Top Players</Text>
 
@@ -100,7 +98,7 @@ const LeaderBoards = ({ navigation }) => {
               <View key={player.uid} style={styles.leaderboardRow}>
                 <Text style={styles.rankText}>{index + 1}</Text>
                 <Text style={styles.usernameText}>{player.username}</Text>
-                <Text style={styles.scoreText}>{player.score}</Text>
+                <Text style={styles.scoreText}>{player.highestScore}</Text>
               </View>
             ))}
           </ScrollView>
@@ -110,7 +108,7 @@ const LeaderBoards = ({ navigation }) => {
             <View style={[styles.leaderboardRow, styles.currentUserContainer]}>
               <Text style={[styles.rankText, { color: '#FFD700' }]}>{userRank}</Text>
               <Text style={[styles.usernameText, { color: '#FFD700' }]}>{username}</Text>
-              <Text style={[styles.scoreText, { color: '#FFD700' }]}>{score}</Text>
+              <Text style={[styles.scoreText, { color: '#FFD700' }]}>{highestScore}</Text>
             </View>
           )}
         </View>

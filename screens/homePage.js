@@ -116,47 +116,54 @@ const logout = async () => {
   const renderAboutUsTeam = () => {
     const aboutUsMembers = [
       { 
-        name: 'Anthonie Cotanda', 
-        role: 'UI/UX - React Native Developer', 
-        image: require('../images/cotanda.webp'), 
-        description: 'I am the React Native Developer of this group, I implemented all the Designs made by our designer. I am also the leader of this group, and I am the one who handles all the tasks of our members. In terms of suggestions, I am very open about the ideas of my members, and I am also giving my thoughts and suggestions to them.'
+        name: 'Aronales, Angelyn', 
+        role: 'Project Manager', 
+        image: require('../images/angelyn.jpg'), 
+        description: 'Ang buhay parang life, walang life kung wala si kurt ❤'
       },
       { 
         name: 'Robles, Renel Nathan Angelo', 
-        role: 'UI/UX - Figma Designer and 60,30,10 Rule', 
+        role: 'UI/UX Developer', 
         image: require('../images/Robles.jpg'), 
-        description: 'I am the Figma Designer Developer of this group, I designed our Figma prototype, and I also got some help from our Leader, He gives me suggestions about our Figma designs. I also handle the 60,30,10 Rule, which is the color palette of our project. I use black, orange, and white colors to match the theme of our own app logo.'
+        description: 'Kapag may kinana, may mabubuong bata.'
       },
       { 
-        name: 'Alfonso, Raijen', 
-        role: 'User Persona', 
-        image: require('../images/Raijen.jpg'), 
-        description: 'As a user persona, we talked about what will be the outcome of what we will do, especially in designing to make it attractive to the audience.'
+        name: 'Gamo, Stanley', 
+        role: 'Frontend Developer', 
+        image: require('../images/vallejo.jpg'), 
+        description: ''
+      },
+      { 
+        name: 'Anthonie Cotanda', 
+        role: 'Backend Developer', 
+        image: require('../images/cotanda.webp'), 
+        description: 'Shabu shabu lang sa daan'
+      },
+      { 
+        name: 'Atay, Sweet Lea', 
+        role: 'Database Administrator', 
+        image: require('../images/Montalban.jpg'), 
+        description: ''
       },
       { 
         name: 'Castro, Crystal Raven', 
-        role: 'Color Theory', 
+        role: 'Assurance Specialist', 
         image: require('../images/castro.jpg'), 
-        description: 'In color theory, we only choose a good color that is good to look at not too dazzling and the color that matches our theme so that it is not difficult to identify what out theme is.'
+        description: 'Better to be late than to be absent.'
       },
       { 
         name: 'Apolinar, Julien', 
-        role: 'Lazy thinking prototype', 
+        role: 'Release Manager', 
         image: require('../images/apolinar.jpg'), 
-        description: 'In lazy thinking prototype presenting a prototype that users can interact with, designers can gather insights on usablity and identify potential issues early in the design process.'
+        description: 'Believe in your self and your dreams.'
       },
       { 
-        name: 'Montalban, John Mark', 
-        role: 'Typography', 
-        image: require('../images/Montalban.jpg'), 
-        description: 'In typhography, we chose proper fonts that can be read from a distance, not totally too big or small, as long as they attract when you read or understand them.'
+        name: 'Alfonso, Raijen', 
+        role: 'User Insights Specialists', 
+        image: require('../images/Raijen.jpg'), 
+        description: ''
       },
-      { 
-        name: 'Vallejo Carlos', 
-        role: 'Spacing', 
-        image: require('../images/vallejo.jpg'), 
-        description: 'In creating visual balance, organization, and readability in any design, including digital interfaces, printed materials, and even musical scores.'
-      },
+
       
     ];
   

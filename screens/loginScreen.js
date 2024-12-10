@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { auth, rtdb, ref, get, update } from "../firebaseConfig"; // Import necessary Firebase functions
 import styles from '../styles/loginScreenStyles';
 
 const CustomTextInput = ({ placeholder, value, onChangeText, secureTextEntry, showPassword, setShowPassword, iconName }) => {
@@ -55,12 +55,39 @@ const LoginScreen = () => {
   
     setLoading(true);
     try {
+      console.log("Attempting to login with email:", email); // Log email for debugging
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;  // Firebase user object
-      navigation.navigate('HomePage', { userId: user.uid });  // Pass userId here
+      const user = userCredential.user;
+  
+      // Log successful login
+      console.log("Login successful for user:", user.email);
+  
+      // Fetch user data from Firebase
+      const userRef = ref(rtdb, `users/${user.uid}`);
+      const snapshot = await get(userRef);
+      const userData = snapshot.val();
+  
+      if (userData) {
+        const username = userData.username; // Get the existing username
+  
+        // Update the status only without overwriting username
+        await update(userRef, {
+          status: 'LOGGED_IN', // Only update the status field
+        });
+  
+        // Navigate to HomePage with userId and username
+        navigation.navigate('HomePage', { userId: user.uid, username: username });
+      } else {
+        console.log('No username found in Firebase for this user.');
+      }
     } catch (error) {
+      console.log("Login failed with error:", error); // Log the error for debugging
       if (error.code === 'auth/invalid-email') {
         Alert.alert("Invalid Email", "Please enter a valid email address.");
+      } else if (error.code === 'auth/user-not-found') {
+        Alert.alert("User Not Found", "No account found with this email.");
+      } else if (error.code === 'auth/wrong-password') {
+        Alert.alert("Wrong Password", "The password entered is incorrect.");
       } else {
         Alert.alert("Login Failed", "Please check your credentials.");
       }
@@ -135,12 +162,11 @@ const LoginScreen = () => {
         )}
       </TouchableOpacity>
 
-
-    <Text style={[styles.signUpText, { fontFamily: 'PressStart2P-Regular' }]}>   
-      Don’t have an account?      
-      <TouchableOpacity onPress={handleRegister}><Text style={[styles.signUpLink, { fontFamily: 'PressStart2P-Regular' }]}>Sign Up</Text>
-      </TouchableOpacity>
-    </Text>
+      <Text style={[styles.signUpText, { fontFamily: 'PressStart2P-Regular' }]}>   
+        Don’t have an account?      
+        <TouchableOpacity onPress={handleRegister}><Text style={[styles.signUpLink, { fontFamily: 'PressStart2P-Regular' }]}>Sign Up</Text>
+        </TouchableOpacity>
+      </Text>
     </View>
   );
 };

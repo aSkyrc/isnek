@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Alert, SafeAreaView, Image } from 'react-
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { rtdb, ref, get, update, onValue } from '../firebaseConfig'; // Import Firebase functions
+import { rtdb, ref, get, onValue, set } from '../firebaseConfig'; // Import Firebase functions
 import styles from '../styles/playGameStyles';
 
 const PlayGame = ({ navigation, route }) => {
@@ -12,6 +12,7 @@ const PlayGame = ({ navigation, route }) => {
   const [score, setScore] = useState(0);
   const [highestScore, setHighestScore] = useState(null); // Start with null to differentiate from 0
   const [gameStatus, setGameStatus] = useState('');
+  const [loading, setLoading] = useState(false); // Define loading state
 
   // Load the Press Start 2P font
   const [loaded] = useFonts({
@@ -55,25 +56,56 @@ const PlayGame = ({ navigation, route }) => {
           setScore(snapshot.val());
         }
       });
-
     }
   }, [userId]);
 
-  const startGame = () => {
+  const startGame = async () => {
     if (!userId) {
       Alert.alert('Error', 'You must be logged in to play the game!');
       return;
     }
-
-    const userGameRef = ref(rtdb, `users/${userId}`);
-    update(userGameRef, { gameStatus: 'STARTED', score: 0 }).then(() => {
-      setGameStatus('STARTED');
-      setScore(0); // Reset score when game starts
-    }).catch((error) => {
-      console.error('Error starting game: ', error);
-    });
+  
+    setLoading(true);
+  
+    try {
+      console.log('Attempting to start the game with userId:', userId);
+  
+      // Update gameStatus in Firebase
+      const gameStatusRef = ref(rtdb, `users/${userId}/gameStatus`);
+      await set(gameStatusRef, 'STARTED');
+  
+      // Start the game by sending the request to the ESP32 server
+      const response = await fetch('http://192.168.0.117/startGame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: userId }),
+      });
+  
+      console.log('Response status:', response.status); // Log the status code
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log('ESP32 Server Response:', data);
+  
+        if (data.status === 'success') {
+          setGameStatus('STARTED'); // Update local state to reflect the change
+          setScore(0); // Reset the score when the game starts
+        } else {
+          Alert.alert('Error', 'Failed to start the game on the ESP32!');
+        }
+      } else {
+        console.error('Server Error:', response.status);
+        Alert.alert('Server Error', `Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Network Error:', error); // Log the error for debugging
+      Alert.alert('Network Error', 'Unable to connect to the server.');
+    } finally {
+      setLoading(false);
+    }
   };
-
+  
+  
   if (!loaded) return null;
 
   return (
@@ -110,11 +142,20 @@ const PlayGame = ({ navigation, route }) => {
           <View style={styles.gameArea}>
             <TouchableOpacity
               style={[styles.startButton, gameStatus === 'STARTED' && styles.disabledButton]}
-              onPress={startGame}
+              onPress={() => {
+                console.log("Start button pressed");
+                startGame();  // Call startGame when the button is pressed
+              }}
               disabled={gameStatus === 'STARTED'}
             >
               <Text style={styles.startButtonText}>START</Text>
             </TouchableOpacity>
+          </View>
+        )}
+
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <Text>Loading...</Text>
           </View>
         )}
 

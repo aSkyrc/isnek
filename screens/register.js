@@ -62,6 +62,9 @@ const Register = () => {
       await set(ref(rtdb, 'users/' + userId), {
         username: username,
         email: email,
+        score: 0,           // Initial score
+        highestScore: 0,    // Initial highest score
+        status: "REGISTERED", // Initial status
       });
 
       Alert.alert("Success", "Account created successfully");
@@ -101,11 +104,12 @@ const Register = () => {
         <Icon name="user" size={18} color="#aaa" style={styles.usericon} />
         {!username && <Text style={styles.placeholderText}>Enter Username</Text>}
         <TextInput
-          style={[styles.input, { fontFamily: 'PressStart2P-Regular' }]}
-          placeholderTextColor="#aaa"
-          value={username}
-          onChangeText={setUsername}
-        />
+            style={[styles.input, { fontFamily: 'PressStart2P-Regular' }]}
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+            maxLength={12} // Set max length to 12 characters
+          />
       </View>
 
       {/* Email input */}

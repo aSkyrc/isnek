@@ -161,7 +161,7 @@ const PlayGame = ({ navigation, route }) => {
 
         <View style={styles.bottomBar}>
           <Text style={styles.highestScoreText}>
-            Highest Score: {highestScore !== null ? highestScore : 'No High Score Yet'}
+            Highest Score: {highestScore !== null ? highestScore : '0'}
           </Text>
         </View>
       </View>

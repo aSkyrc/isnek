@@ -130,8 +130,8 @@ const logout = async () => {
       { 
         name: 'Gamo, Stanley', 
         role: 'Frontend Developer', 
-        image: require('../images/vallejo.jpg'), 
-        description: ''
+        image: require('../images/gamo.jpg'), 
+        description: "Hangga't may paa, may ilalakad."
       },
       { 
         name: 'Anthonie Cotanda', 
@@ -142,8 +142,8 @@ const logout = async () => {
       { 
         name: 'Atay, Sweet Lea', 
         role: 'Database Administrator', 
-        image: require('../images/Montalban.jpg'), 
-        description: ''
+        image: require('../images/sweet.jpg'), 
+        description: 'Working night shift and surviving off water is my motto lol'
       },
       { 
         name: 'Castro, Crystal Raven', 
@@ -161,7 +161,7 @@ const logout = async () => {
         name: 'Alfonso, Raijen', 
         role: 'User Insights Specialists', 
         image: require('../images/Raijen.jpg'), 
-        description: ''
+        description: 'Kung ang balon sa gilid ng damo, ang semento ay mag - gigisa ng sapatos ng liwanag.'
       },
 
       

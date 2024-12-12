@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, rtdb, ref, get, update } from "../firebaseConfig"; // Import necessary Firebase functions
+import { auth, rtdb, ref, get, update } from "../firebaseConfig";
 import styles from '../styles/loginScreenStyles';
 
 const CustomTextInput = ({ placeholder, value, onChangeText, secureTextEntry, showPassword, setShowPassword, iconName }) => {
@@ -47,41 +48,61 @@ const LoginScreen = () => {
     'PressStart2P-Regular': require('../assets/fonts/PressStart2P-Regular.ttf'),
   });
 
+  useEffect(() => {
+    // Load saved credentials if "Remember Me" was previously checked
+    const loadCredentials = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('email');
+        const savedPassword = await AsyncStorage.getItem('password');
+        if (savedEmail && savedPassword) {
+          setEmail(savedEmail);
+          setPassword(savedPassword);
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.error('Error loading saved credentials:', error);
+      }
+    };
+    loadCredentials();
+  }, []);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password.");
       return;
     }
-  
+
     setLoading(true);
     try {
-      console.log("Attempting to login with email:", email); // Log email for debugging
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-  
-      // Log successful login
-      console.log("Login successful for user:", user.email);
-  
-      // Fetch user data from Firebase
+
       const userRef = ref(rtdb, `users/${user.uid}`);
       const snapshot = await get(userRef);
       const userData = snapshot.val();
-  
+
       if (userData) {
-        const username = userData.username; // Get the existing username
-  
-        // Update the status only without overwriting username
+        const username = userData.username;
+
         await update(userRef, {
-          status: 'LOGGED_IN', // Only update the status field
+          status: 'LOGGED_IN',
         });
-  
-        // Navigate to HomePage with userId and username
+
+        // Save credentials if "Remember Me" is checked
+        if (rememberMe) {
+          await AsyncStorage.setItem('email', email);
+          await AsyncStorage.setItem('password', password);
+        } else {
+          await AsyncStorage.removeItem('email');
+          await AsyncStorage.removeItem('password');
+        }
+
         navigation.navigate('HomePage', { userId: user.uid, username: username });
       } else {
-        console.log('No username found in Firebase for this user.');
+        console.error('No username found in Firebase for this user.');
       }
     } catch (error) {
-      console.log("Login failed with error:", error); // Log the error for debugging
+      console.error('Login failed with error:', error);
       if (error.code === 'auth/invalid-email') {
         Alert.alert("Invalid Email", "Please enter a valid email address.");
       } else if (error.code === 'auth/user-not-found') {
@@ -95,8 +116,6 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-  
-  
 
   const handleRegister = () => {
     navigation.navigate('Register');
@@ -105,7 +124,7 @@ const LoginScreen = () => {
   if (!loaded) {
     return <ActivityIndicator size="large" color="#fff" style={{ flex: 1, justifyContent: 'center', backgroundColor: '#000' }} />;
   }
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>

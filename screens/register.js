@@ -24,7 +24,6 @@ const Register = () => {
     'PressStart2P-Regular': require('../assets/fonts/PressStart2P-Regular.ttf'),
   });
 
-  // Validation function
   const isFormValid = () => {
     if (!username || !email || !password || !confirmPassword) {
       Alert.alert("Validation Error", "All fields are required!");
@@ -34,8 +33,12 @@ const Register = () => {
       Alert.alert("Validation Error", "Please enter a valid email address.");
       return false;
     }
-    if (password.length < 8) {
-      Alert.alert("Validation Error", "Password must be at least 8 characters.");
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/; // Regex for at least 8 characters, 1 uppercase, and 1 lowercase
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        "Validation Error",
+        "Password must be at least 8 characters long and include both uppercase and lowercase letters."
+      );
       return false;
     }
     if (password !== confirmPassword) {
@@ -44,7 +47,7 @@ const Register = () => {
     }
     return true;
   };
-
+  
   // Handle Signup and save user data to Realtime Database
   const handleSignup = async () => {
     if (!isFormValid()) {
